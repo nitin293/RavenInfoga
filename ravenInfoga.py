@@ -1,33 +1,40 @@
-import subprocess
-import os
-import re
+from modules import whois
+
+class Infoga:
+
+    def __init__(self, domain):
+        self.domain = domain
+
+    def getWhoIS(self):
+        whois_data = whois.getWhoIS(self.domain)
 
 
-def getWhoIS(domain):
-    whois = {}
 
-    if os.name=="nt":
-        whois_path = os.path.join("tools", "whois.exe")
-        data = subprocess.check_output(f"{whois_path} {domain}", shell=True)
+def features():
 
-    else:
-        data = subprocess.check_output(f"whois {domain}", shell=True)
+    menu = '''
+    (1) WhoIS Data
+    (2) Select All
+    (3) Exit
+    '''
 
-    data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\r\\n")
+    return menu
 
-    for obj in data:
-        key, value = obj.split(":")[0], ':'.join(obj.split(":")[1:])[1:]
-        if key:
-            if key in whois and type(whois[key]) != list:
-                whois[key] = [whois[key]]
-                whois[key].append(value)
-            else:
-                whois[key] = value
-
-    return whois
-
+def launcher(option):
+    print(option)
+    if option==3:
+        exit()
 
 
 if __name__ == '__main__':
-    data = getWhoIS("google.com")
-    print(data)
+    while True:
+        try:
+            print(features())
+            option = int(input("[ RavenInfoga ]>> "))
+            launcher(option=option)
+
+        except ValueError:
+            pass
+
+        except KeyboardInterrupt:
+            exit()
