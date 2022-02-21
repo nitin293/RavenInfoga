@@ -1,5 +1,7 @@
 import argparse
 from modules import whois
+import re
+
 
 class Infoga:
 
@@ -13,42 +15,52 @@ class Infoga:
             print(f"{key}: {whois_data[key]}")
 
 
+class Controller:
+
+    def __init__(self, domain):
+        self.domain = domain
+
+    def clean_domain(self):
+        self.domain = re.sub("http://", "", self.domain)
+        self.domain = re.sub("https://", "", self.domain)
+
+    def features(self):
+
+        menu = '''
+        (1) WhoIS Data
+        (2) Select All
+        (3) Exit
+        '''
+
+        return menu
 
 
-def features():
+    def launcher(self, option):
 
-    menu = '''
-    (1) WhoIS Data
-    (2) Select All
-    (3) Exit
-    '''
+        if option==1:
+            infoga = Infoga(domain=self.domain)
+            infoga.getWhoIS()
 
-    return menu
-
-def launcher(domain, option):
-
-    if option==1:
-        infoga = Infoga(domain=domain)
-        infoga.getWhoIS()
-
-    if option==3:
-        exit()
-
-    else:
-        print("Invalid Option!")
-
-def terminal(domain):
-    while True:
-        try:
-            print(features())
-            option = int(input("[ RavenInfoga ]>> "))
-            launcher(domain=domain, option=option)
-
-        except ValueError:
-            pass
-
-        except KeyboardInterrupt:
+        elif option==3:
             exit()
+
+        else:
+            print("Invalid Option")
+
+
+    def terminal(self):
+        self.clean_domain()
+        while True:
+            try:
+                print(self.features())
+                option = int(input("[ RavenInfoga ]>> "))
+                self.launcher(option=option)
+
+            except ValueError:
+                pass
+
+            except KeyboardInterrupt:
+                exit()
 
 
 
@@ -65,4 +77,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     domain = args.domain
-    terminal(domain)
+
+    controller = Controller(domain=domain)
+    controller.terminal()
