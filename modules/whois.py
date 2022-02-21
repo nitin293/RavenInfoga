@@ -9,11 +9,13 @@ def getWhoIS(domain):
     if os.name=="nt":
         whois_path = os.path.join("tools", "whois.exe")
         data = subprocess.check_output(f"{whois_path} {domain}", shell=True)
+        data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\r\\n")
+    elif os.name=="posix":
+        data = subprocess.check_output(f"whois {domain}", shell=True)
+        data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\n")
 
     else:
-        data = subprocess.check_output(f"whois {domain}", shell=True)
-
-    data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\r\\n")
+        raise os.error
 
     for obj in data:
         key, value = obj.split(":")[0], ':'.join(obj.split(":")[1:])[1:]
