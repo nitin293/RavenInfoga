@@ -1,35 +1,39 @@
-import subprocess
-import os
-import re
-
+import requests
 
 def getWhoIS(domain):
-    whois = {}
+    try:
+        whois = {}
 
-    if os.name=="nt":
-        whois_path = os.path.join("tools", "whois.exe")
-        data = subprocess.check_output(f"{whois_path} {domain}", shell=True)
-        data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\r\\n")
-    elif os.name=="posix":
-        data = subprocess.check_output(f"whois {domain}", shell=True)
-        data = re.findall(r"(Domain Name:.*)(?:>>>)", str(data))[0].split("\\n")
+        whois_response = requests.get(f"https://lookup.icann.org/api/whois?q={domain}").json()
+        whois_response = whois_response["records"][0]
+        whois_response = whois_response["serverResponse"]["rawResponse"]
+        whois_response = whois_response.split(">>>")[0].split('\n')[:-2]
 
-    else:
-        raise os.error
+        for obj in whois_response:
+            key, value = obj.split(':')[0], ':'.join(obj.split(':')[1:])
 
-    for obj in data:
-        key, value = obj.split(":")[0], ':'.join(obj.split(":")[1:])[1:]
-        if key:
-            if key in whois and type(whois[key]) != list:
-                whois[key] = [whois[key]]
-                whois[key].append(value)
-            else:
-                whois[key] = value
+            if key:
+                if key in whois and type(whois[key]) != list:
+                    whois[key] = [whois[key]]
+                    whois[key].append(value)
+                else:
+                    whois[key] = value
 
-    return whois
+        return whois
 
+    except IndexError:
+        return None
 
 
 if __name__ == '__main__':
     data = getWhoIS("google.com")
-    print(data)
+
+    if data:
+
+        for key in data.keys():
+            if type(data[key]) not in [list, set]:
+                print(f"{key}: {data[key]}")
+
+            else:
+                for obj in data[key]:
+                    print(f"{key}: {obj}")

@@ -12,8 +12,12 @@ class Infoga:
         whois_data = whois.getWhoIS(self.domain)
 
         for key in whois_data.keys():
-            print(f"{key}: {whois_data[key]}")
+            if type(whois_data[key]) not in [list, set]:
+                print(f"{key}: {whois_data[key]}")
 
+            else:
+                for obj in whois_data[key]:
+                    print(f"{key}: {obj}")
 
 class Controller:
 
